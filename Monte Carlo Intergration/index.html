@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monte Carlo Function Plotter - Ali Asghari</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        background: #0a0a0a;
+        min-height: 100vh;
+        padding: 20px;
+        color: #e0e0e0;
+      }
+      .container { 
+        max-width: 1200px; 
+        margin: 0 auto;
+        background: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        border: 1px solid #2a2a2a;
+      }
+      header { 
+        background: #1a1a1a;
+        color: #e0e0e0;
+        padding: 32px 40px;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      header h1 {
+        font-size: 1.75rem;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #ffffff;
+      }
+      header p {
+        opacity: 0.7;
+        font-size: 0.95rem;
+        color: #a0a0a0;
+      }
+      header code {
+        background: #2a2a2a;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        color: #60a5fa;
+      }
+      #plot { 
+        width: 100%; 
+        height: 500px;
+        background: #0f0f0f;
+        border-radius: 8px;
+        border: 1px solid #2a2a2a;
+      }
+      #controls {
+        padding: 30px 40px;
+        background: #1a1a1a;
+        border-bottom: 1px solid #2a2a2a;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        align-items: end;
+      }
+      #controls .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      #controls label { 
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #a0a0a0;
+        display: block;
+      }
+      #controls input[type="text"],
+      #controls input[type="number"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #2a2a2a;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        font-family: inherit;
+        background: #0f0f0f;
+        color: #e0e0e0;
+      }
+      #controls input[type="text"]:focus,
+      #controls input[type="number"]:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+      }
+      #controls input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #60a5fa;
+      }
+      .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 8px;
+      }
+      button {
+        padding: 10px 20px;
+        background: #60a5fa;
+        color: #0a0a0a;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        align-self: flex-end;
+      }
+      button:hover {
+        background: #3b82f6;
+        transform: translateY(-1px);
+      }
+      button:active {
+        transform: translateY(0);
+      }
+      button.autoplay-active {
+        background: #34d399;
+        color: #0a0a0a;
+      }
+      button.autoplay-active:hover {
+        background: #10b981;
+      }
+      #plotContainer {
+        padding: 40px;
+        background: #1a1a1a;
+      }
+      .full-width {
+        grid-column: 1 / -1;
+      }
+      #stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .stat-card {
+        background: #0f0f0f;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 20px;
+      }
+      .stat-label {
+        font-size: 0.875rem;
+        color: #a0a0a0;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      .stat-value {
+        font-size: 1.75rem;
+        color: #60a5fa;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+      }
+      .stat-unit {
+        font-size: 0.875rem;
+        color: #a0a0a0;
+        margin-left: 4px;
+      }
+      .footer-link {
+        text-align: center;
+        padding: 20px;
+        background: #1a1a1a;
+        border-top: 1px solid #2a2a2a;
+        font-size: 0.875rem;
+        color: #a0a0a0;
+      }
+      .footer-link a {
+        color: #60a5fa;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .footer-link a:hover {
+        color: #3b82f6;
+        text-decoration: underline;
+      }
+      @media (max-width: 768px) {
+        #controls {
+          grid-template-columns: 1fr;
+        }
+        header h1 {
+          font-size: 1.5rem;
+        }
+        body {
+          padding: 10px;
+        }
+        #controls, #plotContainer, header {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📊 Monte Carlo Function Plotter</h1>
+        <p>Interactive visualization with random sampling and numerical integration</p>
+      </header>
+
+      <!-- Controls -->
+      <div id="controls">
+        <div class="control-group full-width">
+          <label for="fnInput">Function (use 'x' as variable)</label>
+          <input id="fnInput" type="text" value="sin(x) * exp(-0.05 * x * x)" />
+        </div>
+
+        <div class="control-group">
+          <label for="xMin">X Minimum</label>
+          <input id="xMin" type="number" value="-10" step="0.1" />
+        </div>
+
+        <div class="control-group">
+          <label for="xMax">X Maximum</label>
+          <input id="xMax" type="number" value="10" step="0.1" />
+        </div>
+
+        <div class="control-group">
+          <label for="numPoints">Random Points (n)</label>
+          <input id="numPoints" type="number" value="50" min="0" max="1000" />
+        </div>
+
+        <div class="control-group">
+          <label for="autoplaySpeed">Autoplay Speed (ms)</label>
+          <input id="autoplaySpeed" type="number" value="200" min="50" max="2000" step="50" />
+        </div>
+
+        <div class="control-group">
+          <label>Options</label>
+          <div class="checkbox-wrapper">
+            <input id="showPoints" type="checkbox" checked />
+            <label for="showPoints" style="font-weight: normal; margin: 0;">Show Points</label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <button id="plotBtn">🔄 Update Plot</button>
+        </div>
+
+        <div class="control-group">
+          <button id="autoplayBtn">▶️ Start Autoplay</button>
+        </div>
+      </div>
+
+      <div id="plotContainer">
+        <div id="stats">
+          <div class="stat-card">
+            <div class="stat-label">Actual Integral Value</div>
+            <div class="stat-value" id="integralValue">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mean Rectangle Area</div>
+            <div class="stat-value" id="meanArea">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Number of Points</div>
+            <div class="stat-value" id="pointsCount">-</div>
+          </div>
+        </div>
+        <div id="plot"></div>
+      </div>
+
+      <div class="footer-link">
+        Created by <a href="https://asghariali.me" target="_blank">Ali Asghari</a> | 
+        <a href="https://github.com/asghariali1" target="_blank">GitHub</a>
+      </div>
+
+      <!-- Module script: imports function-plot -->
+      <script type="module">
+        import functionPlot from 'https://esm.sh/function-plot@1.25.1';
+        import { f as importedF } from './Montecarlo.js';
+
+        // Helper function to evaluate a mathematical expression
+        function evaluateFunction(fnString, x) {
+          try {
+            // Create a safe evaluation context
+            const fn = new Function('x', `
+              const sin = Math.sin;
+              const cos = Math.cos;
+              const tan = Math.tan;
+              const exp = Math.exp;
+              const log = Math.log;
+              const sqrt = Math.sqrt;
+              const abs = Math.abs;
+              const pow = Math.pow;
+              return ${fnString.replace(/\^/g, '**')};
+            `);
+            return fn(x);
+          } catch (error) {
+            console.error('Error evaluating function:', error);
+            return NaN;
+          }
+        }
+
+        // Generate random points using uniform distribution
+        function generateRandomPoints(fnString, xMin, xMax, n) {
+          const points = [];
+          for (let i = 0; i < n; i++) {
+            // Generate random x from uniform distribution [xMin, xMax]
+            const x = xMin + Math.random() * (xMax - xMin);
+            const y = evaluateFunction(fnString, x);
+            if (!isNaN(y)) {
+              points.push([x, y]);
+            }
+          }
+          // Sort points by x coordinate for consistent rectangle widths
+          points.sort((a, b) => a[0] - b[0]);
+          return points;
+        }
+
+        // Calculate numerical integration using trapezoidal rule
+        function calculateIntegral(fnString, xMin, xMax, steps = 10000) {
+          let sum = 0;
+          const dx = (xMax - xMin) / steps;
+          
+          for (let i = 0; i < steps; i++) {
+            const x1 = xMin + i * dx;
+            const x2 = xMin + (i + 1) * dx;
+            const y1 = evaluateFunction(fnString, x1);
+            const y2 = evaluateFunction(fnString, x2);
+            
+            if (!isNaN(y1) && !isNaN(y2)) {
+              sum += (y1 + y2) / 2 * dx;
+            }
+          }
+          
+          return sum;
+        }
+
+        // Calculate mean rectangle area
+        function calculateMeanRectangleArea(randomPoints) {
+          if (randomPoints.length < 2) return 0;
+          
+          let totalArea = 0;
+          for (let i = 0; i < randomPoints.length - 1; i++) {
+            const [x1, y1] = randomPoints[i];
+            const [x2, y2] = randomPoints[i + 1];
+            const width = x2 - x1;
+            const height = Math.abs(y1);
+            totalArea += width * height;
+          }
+          
+          return totalArea / (randomPoints.length - 1);
+        }
+
+        function updatePlot() {
+          const fnString = document.getElementById('fnInput').value;
+          const xMin = parseFloat(document.getElementById('xMin').value);
+          const xMax = parseFloat(document.getElementById('xMax').value);
+          const numPoints = parseInt(document.getElementById('numPoints').value);
+          const showPoints = document.getElementById('showPoints').checked;
+
+          // Clear the plot div
+          const plotDiv = document.getElementById('plot');
+          plotDiv.innerHTML = '';
+
+          try {
+            const data = [
+              {
+                fn: fnString,
+                graphType: 'polyline'
+              }
+            ];
+
+            let randomPoints = null;
+
+            // Add random points if enabled
+            if (showPoints && numPoints > 0) {
+              randomPoints = generateRandomPoints(fnString, xMin, xMax, numPoints);
+              
+              // Add scatter points
+              data.push({
+                points: randomPoints,
+                fnType: 'points',
+                graphType: 'scatter',
+                color: 'red'
+              });
+            }
+
+            const instance = functionPlot({
+              target: '#plot',
+              width: plotDiv.offsetWidth || 800,
+              height: 400,
+              xAxis: { domain: [xMin, xMax] },
+              grid: true,
+              disableZoom: true,
+              data: data
+            });
+
+            // Add filled rectangles using SVG manipulation
+            if (showPoints && randomPoints && randomPoints.length > 1) {
+              const svg = plotDiv.querySelector('svg');
+              const graphGroup = svg.querySelector('.graph');
+              
+              // Create a group for rectangles before the graph content
+              const rectGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+              rectGroup.setAttribute('class', 'rectangles');
+              graphGroup.insertBefore(rectGroup, graphGroup.firstChild);
+
+              // Get the scale functions from the instance
+              const xScale = instance.meta.xScale;
+              const yScale = instance.meta.yScale;
+
+              // Draw filled rectangles
+              for (let i = 0; i < randomPoints.length - 1; i++) {
+                const [x1, y1] = randomPoints[i];
+                const [x2, y2] = randomPoints[i + 1];
+                
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', xScale(x1));
+                rect.setAttribute('y', yScale(Math.max(0, y1)));
+                rect.setAttribute('width', xScale(x2) - xScale(x1));
+                rect.setAttribute('height', Math.abs(yScale(y1) - yScale(0)));
+                rect.setAttribute('fill', 'rgba(255, 255, 255, 0.3)');
+                rect.setAttribute('stroke', 'rgba(255, 255, 255, 0.6)');
+                rect.setAttribute('stroke-width', '1');
+                
+                rectGroup.appendChild(rect);
+              }
+
+              // Calculate and display mean rectangle area
+              const meanArea = calculateMeanRectangleArea(randomPoints);
+              document.getElementById('meanArea').textContent = meanArea.toFixed(6);
+            }
+
+            // Calculate and display actual integral
+            const integralValue = calculateIntegral(fnString, xMin, xMax);
+            document.getElementById('integralValue').textContent = integralValue.toFixed(6);
+            
+            // Update points count
+            document.getElementById('pointsCount').textContent = numPoints;
+          } catch (error) {
+            plotDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+          }
+        }
+
+        // Autoplay functionality
+        let autoplayInterval = null;
+        let isAutoplayActive = false;
+
+        function toggleAutoplay() {
+          const autoplayBtn = document.getElementById('autoplayBtn');
+          const numPointsInput = document.getElementById('numPoints');
+          const autoplaySpeed = parseInt(document.getElementById('autoplaySpeed').value);
+
+          if (isAutoplayActive) {
+            // Stop autoplay
+            clearInterval(autoplayInterval);
+            isAutoplayActive = false;
+            autoplayBtn.textContent = '▶️ Start Autoplay';
+            autoplayBtn.classList.remove('autoplay-active');
+          } else {
+            // Start autoplay
+            isAutoplayActive = true;
+            autoplayBtn.textContent = '⏸️ Stop Autoplay';
+            autoplayBtn.classList.add('autoplay-active');
+            
+            // Reset to initial value
+            numPointsInput.value = '1';
+            updatePlot();
+
+            autoplayInterval = setInterval(() => {
+              let currentValue = parseInt(numPointsInput.value);
+              
+              // Increment the number of points by 50
+              if (currentValue < 1000) {
+                currentValue += 50;
+                if (currentValue > 1000) currentValue = 1000;
+                numPointsInput.value = currentValue;
+                updatePlot();
+              } else {
+                // Stop when reaching maximum
+                toggleAutoplay();
+              }
+            }, autoplaySpeed);
+          }
+        }
+
+        // Wire controls
+        document.getElementById('plotBtn').addEventListener('click', updatePlot);
+        document.getElementById('autoplayBtn').addEventListener('click', toggleAutoplay);
+
+        // Allow Enter key to update plot
+        document.getElementById('fnInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') updatePlot();
+        });
+
+        // Stop autoplay if user manually changes number of points
+        document.getElementById('numPoints').addEventListener('input', () => {
+          if (isAutoplayActive) {
+            toggleAutoplay();
+          }
+        });
+
+        // Update autoplay speed dynamically
+        document.getElementById('autoplaySpeed').addEventListener('change', () => {
+          if (isAutoplayActive) {
+            toggleAutoplay();
+            setTimeout(toggleAutoplay, 100);
+          }
+        });
+
+        // Initial plot
+        updatePlot();
+      </script>
+    </div>
+  </body>
+</html>
+
