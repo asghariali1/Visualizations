@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Multivariate Distribution Visualizer - Ali Asghari</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>2D Multivariate Distribution Visualizer</h1>
+        <p>Explore different multivariate distributions with interactive controls</p>
+        <p>Choose between Bivariate Normal and Banana distributions</p>
+      </header>
+      
+      <div class="main-content">
+        <div class="controls">
+          <div class="control-group">
+            <h3>Distribution Type</h3>
+            <div class="control-item">
+              <label>Select Distribution</label>
+              <select id="distributionType">
+                <option value="normal">Bivariate Normal</option>
+                <option value="banana">Banana Distribution</option>
+              </select>
+            </div>
+            <div class="info-box">
+              <strong>Bivariate Normal:</strong> Classic 2D Gaussian<br>
+              <strong>Banana:</strong> Crescent-shaped distribution (challenging for sampling)
+            </div>
+          </div>
+
+          <!-- Bivariate Normal Parameters -->
+          <div id="normalParams" class="distribution-params active">
+            <div class="control-group">
+              <h3>X Variable (μ₁, σ₁)</h3>
+              <div class="control-item">
+                <label>Mean X (μ₁)</label>
+                <span class="value-display" id="muXDisplay">0.0</span>
+                <input type="range" id="muX" min="-5" max="5" step="0.1" value="0">
+              </div>
+              <div class="control-item">
+                <label>Std Dev X (σ₁)</label>
+                <span class="value-display" id="sigmaXDisplay">1.0</span>
+                <input type="range" id="sigmaX" min="0.1" max="3" step="0.1" value="1">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <h3>Y Variable (μ₂, σ₂)</h3>
+              <div class="control-item">
+                <label>Mean Y (μ₂)</label>
+                <span class="value-display" id="muYDisplay">0.0</span>
+                <input type="range" id="muY" min="-5" max="5" step="0.1" value="0">
+              </div>
+              <div class="control-item">
+                <label>Std Dev Y (σ₂)</label>
+                <span class="value-display" id="sigmaYDisplay">1.0</span>
+                <input type="range" id="sigmaY" min="0.1" max="3" step="0.1" value="1">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <h3>Correlation</h3>
+              <div class="control-item">
+                <label>Correlation (ρ)</label>
+                <span class="value-display" id="rhoDisplay">0.0</span>
+                <input type="range" id="rho" min="-0.95" max="0.95" step="0.05" value="0">
+              </div>
+              <div class="info-box">
+                <strong>ρ = 0:</strong> Independent<br>
+                <strong>ρ > 0:</strong> Positive correlation<br>
+                <strong>ρ < 0:</strong> Negative correlation
+              </div>
+            </div>
+          </div>
+
+          <!-- Banana Distribution Parameters -->
+          <div id="bananaParams" class="distribution-params">
+            <div class="control-group">
+              <h3>Banana Shape</h3>
+              <div class="control-item">
+                <label>Curvature</label>
+                <span class="value-display" id="curvatureDisplay">0.5</span>
+                <input type="range" id="curvature" min="0" max="2" step="0.1" value="0.5">
+              </div>
+              <div class="info-box">
+                Higher curvature creates a more pronounced banana shape
+              </div>
+            </div>
+
+            <div class="control-group">
+              <h3>Spread Parameters</h3>
+              <div class="control-item">
+                <label>Std Dev X (σ₁)</label>
+                <span class="value-display" id="sigmaXBananaDisplay">1.0</span>
+                <input type="range" id="sigmaXBanana" min="0.1" max="3" step="0.1" value="1">
+              </div>
+              <div class="control-item">
+                <label>Std Dev Y (σ₂)</label>
+                <span class="value-display" id="sigmaYBananaDisplay">1.0</span>
+                <input type="range" id="sigmaYBanana" min="0.1" max="3" step="0.1" value="1">
+              </div>
+            </div>
+          </div>
+
+          <!-- Common Sampling Controls -->
+          <div class="control-group">
+            <h3>Sampling</h3>
+            <div class="control-item">
+              <label>Number of Samples</label>
+              <input type="number" id="numSamples" min="100" max="10000" step="100" value="1000">
+            </div>
+            <button id="resampleBtn">Resample</button>
+          </div>
+        </div>
+
+        <div class="plot-area">
+          <div class="plot-grid">
+            <div class="plot-container">
+              <div id="contourPlot"></div>
+            </div>
+            <div class="plot-container">
+              <div id="scatterPlot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
